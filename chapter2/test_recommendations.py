@@ -4,16 +4,25 @@ from recommendations import *
 
 class TestRecommendations(unittest.TestCase):
 
-    def assertListOfTuples(self, actual, expected):
-        """Applies Equal assertion for each element in a list of tuples"""
-        tuple_size = len(expected[0])
-        for fieldidx in range(tuple_size):
-            for pair in zip([a[fieldidx] for a in actual], 
-                            [e[fieldidx] for e in expected]):
-                if isinstance(pair[1], float): 
-                    self.assertAlmostEqual(*pair)
-                else:
-                    self.assertEqual(*pair)
+    def round_sequence(self, seq, nb_digits=5):
+        """Inspects a nested sequence and rounds the floats to nb_digits"""
+        def round_float(x):
+            if isinstance(x, float):
+                return round(x, nb_digits)
+            elif isinstance(x, list) or isinstance(x, tuple):
+                return self.round_sequence(x, nb_digits)
+            else:
+                return x
+        rounded =  map(round_float, seq)
+        if isinstance(seq, tuple):
+            rounded = tuple(rounded)
+        return rounded
+
+    def test_round_sequence(self):
+        actual = self.round_sequence(
+                [(1.23456, 'a'), (2.34567, 'b'), (3.45678, 'c')], 2)
+        expected = [(1.23, 'a'), (2.35, 'b'), (3.46, 'c')]
+        self.assertEqual(actual, expected)
 
     def setUp(self):
         self.prefs = {'fulano': {'coco': 2.1, 'ranheta': 1.1}, 
@@ -79,11 +88,10 @@ class TestRecommendations(unittest.TestCase):
         expected = [(3.3477895267131013, 'The Night Listener'), 
                     (2.8325499182641614, 'Lady in the Water'), 
                     (2.5309807037655645, 'Just My Luck')]
-        self.assertListOfTuples(actual, expected)
-        # TODO use assertSequence (ver codigo)
-
-
-
+        self.assertIsInstance(actual, list)
+        self.assertEqual(
+                self.round_sequence(actual), 
+                self.round_sequence(expected))
 
 if __name__ == '__main__':
     unittest.main()
