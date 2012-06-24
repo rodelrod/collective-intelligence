@@ -1,28 +1,59 @@
 #!/usr/bin/env python
+from __future__ import division
 import unittest
 from recommendations import *
+import math
 
-class TestRecommendations(unittest.TestCase):
+def floor_n(x, n):
+    return math.floor(x*(10**n)) / 10**n
 
-    def round_sequence(self, seq, nb_digits=5):
-        """Inspects a nested sequence and rounds the floats to nb_digits"""
-        def round_float(x):
-            if isinstance(x, float):
-                return round(x, nb_digits)
-            elif isinstance(x, list) or isinstance(x, tuple):
-                return self.round_sequence(x, nb_digits)
-            else:
-                return x
-        rounded =  map(round_float, seq)
-        if isinstance(seq, tuple):
-            rounded = tuple(rounded)
-        return rounded
+def trunc_n(x, n):
+    return math.trunc(x*(10**n)) / 10**n
+
+def round_sequence(seq, nb_digits=5, roundf=round):
+    """Inspects a nested sequence and rounds the floats to ``nb_digits``
+    
+    Alternate functions can be given to replace the round method. 
+    They must respect the signature f(x, n)
+
+    """
+    def round_float(x):
+        if isinstance(x, float):
+            return roundf(x, nb_digits)
+        elif isinstance(x, list) or isinstance(x, tuple):
+            return round_sequence(x, nb_digits, roundf)
+        else:
+            return x
+    rounded =  map(round_float, seq)
+    if isinstance(seq, tuple):
+        rounded = tuple(rounded)
+    return rounded
+
+
+class TestRoundSequence(unittest.TestCase):
 
     def test_round_sequence(self):
-        actual = self.round_sequence(
-                [(1.23456, 'a'), (2.34567, 'b'), (3.45678, 'c')], 2)
-        expected = [(1.23, 'a'), (2.35, 'b'), (3.46, 'c')]
+        actual = round_sequence(
+                [(1.23456, 'a'), (2.34567, 'b'), (-3.45678, 'c')], 2)
+        expected = [(1.23, 'a'), (2.35, 'b'), (-3.46, 'c')]
         self.assertEqual(actual, expected)
+
+    def test_round_sequence_floor(self):
+        actual = round_sequence(
+                [(1.23456, 'a'), (2.34567, 'b'), (-3.45678, 'c')], 
+                nb_digits=2, roundf=floor_n)
+        expected = [(1.23, 'a'), (2.34, 'b'), (-3.46, 'c')]
+        self.assertEqual(actual, expected)
+
+    def test_round_sequence_trunc(self):
+        actual = round_sequence(
+                [(1.23456, 'a'), (2.34567, 'b'), (-3.45678, 'c')], 
+                nb_digits=2, roundf=trunc_n)
+        expected = [(1.23, 'a'), (2.34, 'b'), (-3.45, 'c')]
+        self.assertEqual(actual, expected)
+
+
+class TestRecommendations(unittest.TestCase):
 
     def setUp(self):
         self.prefs = {'fulano': {'coco': 2.1, 'ranheta': 1.1}, 
@@ -83,8 +114,8 @@ class TestRecommendations(unittest.TestCase):
                     (0.89340514744156474, 'Claudia Puig')]
         self.assertIsInstance(actual, list)
         self.assertEqual(
-                self.round_sequence(actual), 
-                self.round_sequence(expected))
+                round_sequence(actual), 
+                round_sequence(expected))
 
     def test_getRecommendations(self):
         actual = getRecommendations(critics,'Toby')
@@ -93,8 +124,34 @@ class TestRecommendations(unittest.TestCase):
                     (2.5309807037655645, 'Just My Luck')]
         self.assertIsInstance(actual, list)
         self.assertEqual(
-                self.round_sequence(actual), 
-                self.round_sequence(expected))
+                round_sequence(actual), 
+                round_sequence(expected))
+
+    def test_transformPrefs(self):
+        byname = {'Lisa Rose': 
+                      {'Lady in the Water': 2.5, 'Snakes on a Plane': 3.5},
+                  'Gene Seymour': 
+                      {'Lady in the Water': 3.0, 'Snakes on a Plane': 3.5}}
+        bymovie = {'Lady in the Water':
+                      {'Lisa Rose':2.5,'Gene Seymour':3.0},
+                   'Snakes on a Plane':
+                      {'Lisa Rose':3.5,'Gene Seymour':3.5}} 
+        actual = transformPrefs(byname)
+        expected = bymovie
+        self.assertEqual(actual, expected)
+
+    def test_topMatches_movies(self):
+        movies = transformPrefs(critics)
+        matches_long = topMatches(movies, 'Superman Returns')
+        matches = round_sequence(matches_long, 3, trunc_n) 
+        self.assertEqual(
+                matches,
+                [(0.657, 'You, Me and Dupree'), 
+                 (0.487, 'Lady in the Water'), 
+                 (0.111, 'Snakes on a Plane'), 
+                 (-0.179, 'The Night Listener'), 
+                 (-0.422, 'Just My Luck')])
+
 
 if __name__ == '__main__':
     unittest.main()

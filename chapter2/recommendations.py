@@ -85,7 +85,6 @@ def cov(seq1, seq2):
 def pearson_corr(seq1, seq2):
     return cov(seq1, seq2)/(stdev2(seq1)*stdev2(seq2))
 
-
 def sim_pearson(prefs, person1, person2):
     shared_movies = get_shared_movies(prefs, person1, person2)
     if len(shared_movies) == 0:
@@ -103,11 +102,13 @@ def topMatches(prefs, person, n=5, similarity=sim_pearson):
                    if person != other]
     all_matches.sort()
     all_matches.reverse()
-    return all_matches[0:3]
+    return all_matches[0:n]
 
-# Gets recommendations for a person by using a weighted average
-# of every other user's rankings
 def getRecommendations(prefs,person,similarity=sim_pearson):
+    """Gets recommendations for a person by using a weighted average
+    of every other user's rankings
+    
+    """
     weighted_similarities = dict((
             (other, similarity(prefs, person, other)) 
             for other in prefs.keys() if other != person))
@@ -128,6 +129,14 @@ def getRecommendations(prefs,person,similarity=sim_pearson):
     recommendations.sort()
     recommendations.reverse()
     return recommendations
+
+def transformPrefs(prefs):
+    new_prefs = defaultdict(dict)
+    for person, movies in prefs.items():
+        for movie, rating in movies.items():
+            new_prefs[movie][person] = rating
+    return new_prefs
+
 
 
 
