@@ -9,4 +9,5 @@ Some of the differences:
  - Used descriptive variable names
  - Respects PEP 8 style 
  - More idiomatic Python
- - Some of the of the code is clearer and/or better perfoming 
+ - Some of the code is clearer and/or better perfoming 
+ - And some may be worse, who knows...
