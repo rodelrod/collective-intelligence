@@ -7,6 +7,7 @@ First Edition
 """
 from __future__ import division
 from math import sqrt
+from collections import defaultdict
 
 class ArgumentError(Exception):
     pass
@@ -107,6 +108,27 @@ def topMatches(prefs, person, n=5, similarity=sim_pearson):
 # Gets recommendations for a person by using a weighted average
 # of every other user's rankings
 def getRecommendations(prefs,person,similarity=sim_pearson):
-    pass    
+    weighted_similarities = dict((
+            (other, similarity(prefs, person, other)) 
+            for other in prefs.keys() if other != person))
+    # Eliminate critics with negative correlation (I'm not sure why
+    # this is a good idea)
+    for critic, sim in weighted_similarities.items():
+        if sim <= 0:
+            del weighted_similarities[critic]
+    sum_ratings = defaultdict(int)      # int() initializes to 0
+    sum_weights = defaultdict(int)
+    for other, weight in weighted_similarities.items():
+        for movie, rating in prefs[other].items():
+            sum_ratings[movie] += rating * weight
+            sum_weights[movie] += weight
+    recommendations = [(sum_ratings[movie]/sum_weights[movie], movie)
+                       for movie in sum_ratings.keys()
+                       if movie not in prefs[person].keys()]
+    recommendations.sort()
+    recommendations.reverse()
+    return recommendations
+
+
 
 

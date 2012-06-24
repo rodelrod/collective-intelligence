@@ -81,7 +81,10 @@ class TestRecommendations(unittest.TestCase):
         expected = [(0.99124070716192991, 'Lisa Rose'), 
                     (0.92447345164190486, 'Mick LaSalle'), 
                     (0.89340514744156474, 'Claudia Puig')]
-        self.assertListOfTuples(actual, expected)
+        self.assertIsInstance(actual, list)
+        self.assertEqual(
+                self.round_sequence(actual), 
+                self.round_sequence(expected))
 
     def test_getRecommendations(self):
         actual = getRecommendations(critics,'Toby')
