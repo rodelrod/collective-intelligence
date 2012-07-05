@@ -45,7 +45,7 @@ for user, tags in user_posts.items():
                     'url': site[0],
                     'user': user
                     })
-with open('mock_delicious.py', 'w') as outfile:
+with open('delicious_posts_mock.py', 'w') as outfile:
     outfile.write('POSTS = \\\n')
     pprint(posts, outfile)
 
