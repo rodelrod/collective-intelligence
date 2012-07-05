@@ -69,12 +69,15 @@ class TestRecommendations(unittest.TestCase):
         self.assertEqual(distance, 0)
 
     def test_get_shared_movies(self):
-        self.assertEqual(rec.get_shared_movies(self.prefs, 'fulano', 'sicrano'), 
-                    [])
-        self.assertEqual(rec.get_shared_movies(self.prefs, 'fulano', 'beltrano'), 
-                    ['coco', 'ranheta'])
-        self.assertEqual(rec.get_shared_movies(self.prefs, 'sicrano', 'beltrano'), 
-                    ['facada'])
+        self.assertEqual(
+                rec.get_shared_movies(self.prefs, 'fulano', 'sicrano'), 
+                [])
+        self.assertEqual(
+                rec.get_shared_movies(self.prefs, 'fulano', 'beltrano'), 
+                ['coco', 'ranheta'])
+        self.assertEqual(
+                rec.get_shared_movies(self.prefs, 'sicrano', 'beltrano'), 
+                ['facada'])
 
     def test_get_rating_across_movie_list(self):
         ratings = rec.get_rating_across_movie_list(self.prefs, 'fulano', ['coco'])
@@ -97,18 +100,18 @@ class TestRecommendations(unittest.TestCase):
                 1.8333333333333333)
 
     def test_pearson_corr(self):
-         self.assertAlmostEqual(
+        self.assertAlmostEqual(
                 rec.pearson_corr([2,3,3,5,6,8,8,8,4,1,1,2], [5,4,3,7,3,5,5,4,5,2,2,3]),
                 0.501296346484753)
 
     def test_sim_pearson(self):
-        distance = sim_pearson(self.prefs, 'fulano', 'beltrano')
+        distance = rec.sim_pearson(self.prefs, 'fulano', 'beltrano')
         self.assertAlmostEqual(distance, 1.)
-        book_distance = sim_pearson(critics, 'Lisa Rose', 'Gene Seymour')
+        book_distance = rec.sim_pearson(rec.critics, 'Lisa Rose', 'Gene Seymour')
         self.assertAlmostEqual(book_distance, 0.396059017191)
 
     def test_topMatches(self):
-        actual = rec.topMatches(critics,'Toby',n=3)
+        actual = rec.topMatches(rec.critics,'Toby',n=3)
         expected = [(0.99124070716192991, 'Lisa Rose'), 
                     (0.92447345164190486, 'Mick LaSalle'), 
                     (0.89340514744156474, 'Claudia Puig')]
@@ -118,7 +121,7 @@ class TestRecommendations(unittest.TestCase):
                 round_sequence(expected))
 
     def test_getRecommendations(self):
-        actual = rec.getRecommendations(critics,'Toby')
+        actual = rec.getRecommendations(rec.critics,'Toby')
         expected = [(3.3477895267131013, 'The Night Listener'), 
                     (2.8325499182641614, 'Lady in the Water'), 
                     (2.5309807037655645, 'Just My Luck')]
@@ -141,7 +144,7 @@ class TestRecommendations(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_topMatches_movies(self):
-        movies = rec.transformPrefs(critics)
+        movies = rec.transformPrefs(rec.critics)
         matches_long = rec.topMatches(movies, 'Superman Returns')
         matches = round_sequence(matches_long, 3, trunc_n) 
         self.assertEqual(
