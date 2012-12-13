@@ -104,6 +104,11 @@ class TestRecommendations(unittest.TestCase):
                 rec.pearson_corr([2,3,3,5,6,8,8,8,4,1,1,2], [5,4,3,7,3,5,5,4,5,2,2,3]),
                 0.501296346484753)
 
+    def test_pearson_corr_zero(self):
+        self.assertAlmostEqual(
+                rec.pearson_corr([0] * 10000000 + [1], [1] + [0] * 10000000),
+                0.0)
+
     def test_sim_pearson(self):
         distance = rec.sim_pearson(self.prefs, 'fulano', 'beltrano')
         self.assertAlmostEqual(distance, 1.)

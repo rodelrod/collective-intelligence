@@ -83,6 +83,8 @@ def cov(seq1, seq2):
     return eXY - (eX * eY)
 
 def pearson_corr(seq1, seq2):
+    if len(seq1) != len(seq2):
+        return 0    # this should actually raise an exception
     return cov(seq1, seq2)/(stdev2(seq1)*stdev2(seq2))
 
 def sim_pearson(prefs, person1, person2):
@@ -94,9 +96,13 @@ def sim_pearson(prefs, person1, person2):
                    for person in [person1, person2]]
         return pearson_corr(ratings[0], ratings[1])
 
-# Returns the best matches for person from the prefs dictionary.
-# Number of results and similarity function are optional params.
 def topMatches(prefs, person, n=5, similarity=sim_pearson):
+    """Returns the best matches for person from the prefs dictionary.
+
+    n -- Number of results 
+    similarity -- similarity function (pearson, euclidean, etc.)
+
+    """
     all_matches = [(similarity(prefs, person, other), other) 
                    for other in prefs.keys()
                    if person != other]
@@ -105,8 +111,9 @@ def topMatches(prefs, person, n=5, similarity=sim_pearson):
     return all_matches[0:n]
 
 def getRecommendations(prefs,person,similarity=sim_pearson):
-    """Gets recommendations for a person by using a weighted average
-    of every other user's rankings
+    """Gets recommendations for a person.
+    
+    Uses a weighted average of every other user's rankings
     
     """
     weighted_similarities = dict((
